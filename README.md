@@ -15,3 +15,6 @@ A Spectral ruleset
 
 https://github.com/baloise-incubator/spectral-ruleset
 
+...
+
+https://github.com/Nexmo/api-specification/blob/7e16f17b2678e5477bef7f0bc2d084d75db87e91/.spectral.yml
