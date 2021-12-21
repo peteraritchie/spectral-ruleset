@@ -1,0 +1,16 @@
+extends: [[spectral:oas, all]]
+
+functionsDir: ./functions/
+
+functions:
+  - requiredPropertiesExist
+
+rules:
+  required-properties-must-exist:
+    description: Required properties must exist
+    given: $..[?(@.schema||@.items)].[?(@.required)]
+    severity: error
+    recommended: true
+    message: "{{error}}"
+    then:
+      function: requiredPropertiesExist
