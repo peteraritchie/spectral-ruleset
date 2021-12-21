@@ -35,4 +35,24 @@ Avoid composition (allOf, oneOf, etc.) at top-level schema
 
 Avoid online enums
 
+...
 
+  # pri-pattern-should-not-be-example-schema:
+  #   description: 'pattern should not be `^example-[0-9a-z+]$`'
+  #   severity: error
+  #   recommended: true
+  #   type: 'style'
+  #   given:
+  #     $.components..schemas[?(@.pattern && @.pattern=='^example-[0-9a-z]+$')]
+  #   then:
+  #     function: falsy
+
+  # pri-pattern-should-not-be-example:
+  #   description: 'pattern should not be `^example-[0-9a-z+]$`'
+  #   severity: error
+  #   recommended: true
+  #   type: 'style'
+  #   given:
+  #     $..properties[?(@.pattern=='^example-[0-9a-z]+$')]
+  #   then:
+  #     function: falsy
