@@ -13,3 +13,5 @@ A Spectral ruleset
 #126	SHOULD define dates properties compliant with RFC 3339	-	-	-
 #127	SHOULD define time durations and intervals properties conform to ISO 8601
 
+https://github.com/baloise-incubator/spectral-ruleset
+
