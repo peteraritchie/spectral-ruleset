@@ -36,7 +36,7 @@ Avoid composition (allOf, oneOf, etc.) at top-level schema
 Avoid online enums
 
 ...
-
+```yaml
   # pri-pattern-should-not-be-example-schema:
   #   description: 'pattern should not be `^example-[0-9a-z+]$`'
   #   severity: error
@@ -56,3 +56,4 @@ Avoid online enums
   #     $..properties[?(@.pattern=='^example-[0-9a-z]+$')]
   #   then:
   #     function: falsy
+```
