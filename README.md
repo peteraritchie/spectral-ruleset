@@ -22,3 +22,17 @@ https://github.com/Nexmo/api-specification/blob/7e16f17b2678e5477bef7f0bc2d084d7
 ...
 
 https://github.com/stoplightio/spectral/discussions/1398
+
+...
+
+`true` not `True`, etc.
+
+...
+
+Avoid composition (allOf, oneOf, etc.) at top-level schema
+
+...
+
+Avoid online enums
+
+
