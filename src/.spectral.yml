@@ -4,13 +4,77 @@ functionsDir: ./functions/
 
 functions:
   - requiredPropertiesExist
+  - debug
+  - ensureExpectedDeleteResponses
+  - ensureLocationHeader
 
 rules:
-  required-properties-must-exist:
+  contact-properties: false
+  oas3-parameter-description: false
+  operation-description: false
+  operation-2xx-response: false
+  operation-default-response: false
+
+  pri-required-properties-must-exist-oas0001:
     description: Required properties must exist
     given: $..[?(@.schema||@.items)].[?(@.required)]
     severity: error
+    type: validation
     recommended: true
     message: "{{error}}"
     then:
       function: requiredPropertiesExist
+
+  pri-boolean-elements-should-not-be-nullable-oas1001:
+    description: 'Boolean elements should not be nullable'
+    severity: error
+    recommended: true
+    type: 'style'
+    given: $..[?(@.type==='boolean')]
+    message: "boolean element {{path}} should not have have a nullable field"
+    then:
+      field: nullable
+      function: falsy
+
+  pri-pattern-should-not-be-example-schema-oas1000:
+    description: 'pattern should not be `^example-[0-9a-z+]$`'
+    type: validation
+    given:
+      - $.components.schemas.[?(@.pattern)]
+      - $..[?(@.pattern)].pattern
+    message: "{{path}} should not have the value '{{value}}'"
+    then:
+      field: pattern
+      function: pattern
+      functionOptions:
+        notMatch: \^example-\[0-9a-z\]\+\$
+
+  pri-delete-should-have-expected-responses-oas2000:
+    alias: v3-response-delete-2xx
+    documentationUrls:
+      - https://apisecurity.io/encyclopedia/content/oasv3/datavalidation/responsedefinition/v3-response-delete-2xx
+      - https://datatracker.ietf.org/doc/html/rfc7231#section-6.3
+    description: 'delete should have expected responses'
+    severity: error
+    recommended: true
+    type: validation
+    given:
+      "$.paths.*[?( @property === 'delete')]"
+    message: "A delete operation should include one or more responses of type 200, 201, 202, or 204"
+    then:
+      field: "responses"
+      function: ensureExpectedDeleteResponses
+
+  pri-201-created-must-have-Location-header-in-response:
+    description: 201 created must have Location header in response
+    documentationUrl: https://datatracker.ietf.org/doc/html/rfc7231#section-6.3.2
+    severity: error
+    recommended: true
+    type: validation
+    message: "201 Created response does not include a Location header"
+    given:
+      $.paths..responses[?(@property==='201')]
+    then:
+      function: ensureLocationHeader
+  # pri-post-should-include-201-created-response
+# "put update is not RESTful"
