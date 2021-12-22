@@ -1,3 +1,10 @@
+# secrets
+*.key
+*.ppk
+*.pem
+*.pri
+*.pfx
+
 # Logs
 logs
 *.log
