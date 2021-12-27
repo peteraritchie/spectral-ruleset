@@ -3,10 +3,11 @@ extends: [[spectral:oas, all]]
 functionsDir: ./functions/
 
 functions:
-  - requiredPropertiesExist
   - debug
+  - requiredPropertiesExist
   - ensureExpectedDeleteResponses
   - ensureLocationHeader
+  - assert-http-codes-for-operation
 
 rules:
   contact-properties: false
@@ -27,7 +28,7 @@ rules:
 
   pri-boolean-elements-should-not-be-nullable-oas1001:
     description: 'Boolean elements should not be nullable'
-    severity: error
+    severity: warn
     recommended: true
     type: 'style'
     given: $..[?(@.type==='boolean')]
@@ -35,6 +36,34 @@ rules:
     then:
       field: nullable
       function: falsy
+
+  pri-string-headers-must-have-pattern-defined-oas2004:
+    description: Header missing required `pattern` property
+    given: $..headers..[?(@.schema && @.schema.type && @.schema.type=='string')]
+    recommended: true
+    severity: error
+    documentationUrl: https://apisecurity.io/encyclopedia/content/oasv2/datavalidation/responseheader/response-header-string-pattern
+    then:
+      field: pattern
+      function: truthy
+
+  # pri-boolean-elements-should-use-correct-keywords-oas1003:
+  #   description: 'Boolean elements should not be nullable'
+  #   severity: error
+  #   recommended: true
+  #   resolved: true
+  #   type: 'style'
+  #   given: $..[?(@.type==='boolean')]
+  #   # message: "boolean value {{value}} is not a valid keyword for type"
+  #   message: "{{error}}"
+  #   then:
+  #     # field: default
+  #     # function: enumeration
+  #     # functionOptions:
+  #     #   values:
+  #     #     - 'true'
+  #     #     - 'false'
+  #     function: debug
 
   pri-pattern-should-not-be-example-schema-oas1000:
     description: 'pattern should not be `^example-[0-9a-z+]$`'
@@ -55,7 +84,7 @@ rules:
       - https://apisecurity.io/encyclopedia/content/oasv3/datavalidation/responsedefinition/v3-response-delete-2xx
       - https://datatracker.ietf.org/doc/html/rfc7231#section-6.3
     description: 'delete should have expected responses'
-    severity: error
+    severity: warn
     recommended: true
     type: validation
     given:
@@ -65,7 +94,7 @@ rules:
       field: "responses"
       function: ensureExpectedDeleteResponses
 
-  pri-201-created-must-have-Location-header-in-response:
+  pri-201-created-must-have-Location-header-in-response-oas2001:
     description: 201 created must have Location header in response
     documentationUrl: https://datatracker.ietf.org/doc/html/rfc7231#section-6.3.2
     severity: error
@@ -78,3 +107,77 @@ rules:
       function: ensureLocationHeader
   # pri-post-should-include-201-created-response
 # "put update is not RESTful"
+
+  pri-resource-names-should-url-friendly-oas2002:
+    description: MUST use URL-friendly resource identifiers
+    severity: error
+    recommended: true
+    message: "{{path}} contains invalid characters: {{error}}"
+    given: $.paths[*]~
+    then:
+      function: pattern
+      functionOptions:
+        match: ^([-a-zA-Z0-9:._\/]+(\{[^\}]+\})?)+$
+
+  should-use-well-understood-http-status-codes:
+    message: '{{error}}'
+    description: MUST use standard HTTP status codes [150]
+    documentationUrl: https://opensource.zalando.com/restful-api-guidelines/#150
+    sourceUrl: https://github.com/baloise-incubator/spectral-ruleset/blob/main/zalando.yml
+    severity: warn
+    given: $.paths.*
+    type: validation
+    then:
+      function: assert-http-codes-for-operation
+      functionOptions:
+        wellUnderstood:
+          # Success Codes
+          '200': [ALL]
+          '201': [POST, PUT]
+          '202': [POST, PUT, DELETE, PATCH]
+          '204': [PUT, DELETE, PATCH]
+          '207': [POST]
+
+          # Redirection Codes
+          '301': [ALL]
+          '303': [PATCH, POST, PUT, DELETE]
+          '304': [GET, HEAD]
+
+          # Client Side Error Codes
+          '400': [ALL]
+          '401': [ALL]
+          '403': [ALL]
+          '404': [ALL]
+          '405': [ALL]
+          '406': [ALL]
+          '408': [ALL]
+          '409': [POST, PUT, DELETE, PATCH]
+          '410': [ALL]
+          '412': [PUT, DELETE, PATCH]
+          '415': [POST, PUT, DELETE, PATCH]
+          '423': [PUT, DELETE, PATCH]
+          '428': [ALL]
+          '429': [ALL]
+
+          # Server Side Error Codes
+          '500': [ALL]
+          '501': [ALL]
+          '503': [ALL]
+
+          # OpenApi
+          'default': [ALL]
+
+  pri-should-avoid-multiple-of-oas0002:
+    message: Avoid use of multipleOf; prefer a pattern e.g. ^[0-9]+\.[0-9]{1,2}
+    description: Avoid use of multipleOf; prefer a pattern e.g. ^[0-9]+\.[0-9]{1,2}
+    severity: warn
+    given: $..multipleOf
+    type: validation
+    then:
+      function: falsy
+
+# {{error}} - the error returned by function
+# {{description}} - the description set on the rule
+# {{path}} - the whole error path
+# {{property}} - the last segment of error path
+# {{value}} - the linted value

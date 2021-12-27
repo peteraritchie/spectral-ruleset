@@ -33,7 +33,7 @@ tags:
     description: Find out more about our store
     url: http://swagger.io
 paths:
-  /pet:
+  /p•et:
     put:
       tags:
       - pet
@@ -206,6 +206,10 @@ paths:
       responses:
         '200':
           description: successful operation
+          headers:
+            x-ids:
+              schema:
+                type: string
           content:
             application/xml:
               schema:
@@ -295,6 +299,7 @@ paths:
         schema:
           type: integer
           format: int64
+          multipleOf: .01
       requestBody:
         content:
           multipart/form-data:
@@ -648,7 +653,7 @@ components:
           - delivered
         complete:
           type: boolean
-          default: false
+          default: False
       xml:
         name: Order
     Category:
